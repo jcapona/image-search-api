@@ -31,7 +31,9 @@ app.get("/latest", function(request, response) {
 });
 
 app.get("/imagesearch/*", function(request, response) {
-  searchImgs(request.params[0],function(err,resp){
+  var offset = request.query["offset"] > 0? Number(request.query["offset"]):1;
+  
+  searchImgs(request.params[0],offset,function(err,resp){
     if(err)
     {
       console.error(err);
@@ -76,14 +78,14 @@ function getLatest(callback)
   });
 }
 
-function searchImgs(str, callback)
+function searchImgs(str, offset, callback)
 {
   var google = require('googleapis');
   var customsearch = google.customsearch('v1');
   const CX = '010473170237434595792:z_8lctunzfu';
   const API_KEY = 'AIzaSyANNn0S6K_8ytUuCH15l1bROI9S33CpQSk';
 
-  customsearch.cse.list({ cx: CX, q: str, auth: API_KEY, searchType: "image"}, function(err, resp) 
+  customsearch.cse.list({ cx: CX, q: str, auth: API_KEY, searchType: "image", start: offset.toString()}, function(err, resp) 
   {
     if (err) {
       console.error(err);
@@ -117,14 +119,17 @@ function searchImgs(str, callback)
 function makeImgArr(itemArr, query, callback)
 {
   var resArr = [];
-  for(var i=0; i<10; i++)
+  for(var i=0; i<itemArr.length; i++)
   {
-    var obj = {};
-    obj.url = itemArr[i].link;
-    obj.snippet = query + " image.";
-    obj.thumbnail = itemArr[i].image.thumbnailLink;
-    obj.context = itemArr[i].image.contextLink;
-    resArr.push(obj);
+    if(itemArr[i] !== undefined)
+    {
+      var obj = {};
+      obj.url = itemArr[i].link;
+      obj.snippet = query + " image.";
+      obj.thumbnail = itemArr[i].image.thumbnailLink;
+      obj.context = itemArr[i].image.contextLink;
+      resArr.push(obj);
+    }
   }
   callback(null,resArr);
 }
