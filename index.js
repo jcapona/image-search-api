@@ -25,7 +25,7 @@ app.get("/latest", function(request, response) {
       if(response == null)
         response.end(JSON.stringify({"error":"No history"}));
       else
-        response.end("Displaying latest queries");
+        response.end(JSON.stringify(resp));
     }
   });  
 });
@@ -55,9 +55,25 @@ app.get("*", function(request, response) {
 app.listen(app.get('port'));
 
 
+// CONTROLLERS
+
 function getLatest(callback)
 {
-  callback("Latest");
+  mongo.connect(MONGOLAB_URI, function(err, db) {
+    if(err)
+      return callback(err,null);
+
+    var col = db.collection('image-search');
+    col.find({},{term: 1,when: 1, _id: 0}).toArray(function(err, documents) {
+      if(err) // On error
+      {
+        db.close();
+        callback(err,null);
+      }
+      db.close();
+      callback(null,documents);
+    })
+  });
 }
 
 function searchImgs(str, callback)
@@ -70,7 +86,7 @@ function searchImgs(str, callback)
   customsearch.cse.list({ cx: CX, q: str, auth: API_KEY, searchType: "image"}, function(err, resp) 
   {
     if (err) {
-      console.log('An error occured', err);
+      console.error(err);
       callback(err,null);
     }
 
