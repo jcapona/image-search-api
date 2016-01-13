@@ -64,47 +64,73 @@ function searchImgs(str, callback)
 {
   var google = require('googleapis');
   var customsearch = google.customsearch('v1');
-
   const CX = '010473170237434595792:z_8lctunzfu';
   const API_KEY = 'AIzaSyANNn0S6K_8ytUuCH15l1bROI9S33CpQSk';
-  const SEARCH = str;
 
-  customsearch.cse.list({ cx: CX, q: SEARCH, auth: API_KEY, searchType: "image"}, function(err, resp) 
+  customsearch.cse.list({ cx: CX, q: str, auth: API_KEY, searchType: "image"}, function(err, resp) 
   {
     if (err) {
       console.log('An error occured', err);
       callback(err,null);
     }
 
-    console.log('Result: ' + resp.searchInformation.formattedTotalResults);
     if (resp.items && resp.items.length > 0) 
     {
-      makeImgArr(resp.items,function(err,arr){
+      makeImgArr(resp.items,str,function(err,arr){
         if (err) {
           console.error(err);
           callback(err,null);
         }   
         else
-          callback(null,arr);
-      });  
+        {
+          insert(str,function(err,resp){
+            if(err)
+              callback(err,null);
+            else
+              callback(null,arr);
+          });
+
+        }
+      }); 
 
     }
 
   });
 }
 
-function makeImgArr(itemArr, callback)
+function makeImgArr(itemArr, query, callback)
 {
   var resArr = [];
   for(var i=0; i<10; i++)
   {
     var obj = {};
     obj.url = itemArr[i].link;
-    obj.snippet = " "
+    obj.snippet = query + " image.";
     obj.thumbnail = itemArr[i].image.thumbnailLink;
     obj.context = itemArr[i].image.contextLink;
     resArr.push(obj);
   }
   callback(null,resArr);
+}
+
+function insert(query,callback)
+{
+  mongo.connect(MONGOLAB_URI, function(err, db) {
+    if(err)
+      return callback(err,null);
+    
+    var date = new Date();
+    db.collection('image-search').insert(({"term":query,"when":date.toISOString()}), function(err, result) {
+      if(err)
+      {
+        db.close();
+        return callback(err);
+      }
+     
+      db.close();
+      callback(null,true);
+    });
+
+  });
 }
 
