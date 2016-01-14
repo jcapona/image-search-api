@@ -41,7 +41,7 @@ app.get("/imagesearch/*", function(request, response) {
     if(err)
     {
       console.error(err);
-      response.end(err);
+      response.end(err.toString());
     }
     else
     {
