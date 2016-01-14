@@ -31,8 +31,9 @@ app.get("/latest", function(request, response) {
 });
 
 app.get("/imagesearch/*", function(request, response) {
-  var offset = request.query["offset"] > 0? Number(request.query["offset"]):1;
-  
+  // Offset must be less than 91
+  var offset = request.query["offset"] > 0? request.query["offset"] > 91 ? 91 : Number(request.query["offset"]) : 1;
+
   searchImgs(request.params[0],offset,function(err,resp){
     if(err)
     {
@@ -44,7 +45,7 @@ app.get("/imagesearch/*", function(request, response) {
       if(resp == null)
         response.end(JSON.stringify({"error":"No images found for given input"}));
       else
-        response.end(JSON.stringify(resp,null,2));
+        response.end(JSON.stringify(resp));
     }
   });
 });
@@ -85,11 +86,12 @@ function searchImgs(str, offset, callback)
   const CX = '010473170237434595792:z_8lctunzfu';
   const API_KEY = 'AIzaSyANNn0S6K_8ytUuCH15l1bROI9S33CpQSk';
 
-  customsearch.cse.list({ cx: CX, q: str, auth: API_KEY, searchType: "image", start: offset.toString()}, function(err, resp) 
+  customsearch.cse.list({ cx: CX, q: str, auth: API_KEY, searchType: "image", start: Number(offset)}, function(err, resp) 
   {
-    if (err) {
+    if(err)
+    {
       console.error(err);
-      callback(err,null);
+      return callback(err,null);
     }
 
     if (resp.items && resp.items.length > 0) 
