@@ -31,6 +31,9 @@ app.get("/latest", function(request, response) {
 });
 
 app.get("/imagesearch/*", function(request, response) {
+  if(request.params[0].length == 0)
+    return response.redirect("/");
+    
   // Offset must be less than 91
   var offset = request.query["offset"] > 0? request.query["offset"] > 91 ? 91 : Number(request.query["offset"]) : 1;
 
