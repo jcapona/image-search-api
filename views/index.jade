@@ -5,9 +5,11 @@ html
 
     h1 Image Search API
 
-    p Gets image URLs, alt text and page urls for a set of images relating to a given search string.
+    p Gets image URLs, alt text and page urls for a set of images relating to a given search string (/imagesearch/).
     
     p Paginates through the responses by adding a ?offset=2 parameter to the URL.
+    
+    p Gets a list of the most recently submitted search strings (/latest)
 
 
     h2 Examples of use
@@ -17,15 +19,23 @@ html
         p 
             b Query #1
 
-        p 
+        p   image-search-api.herokuapp.com/imagesearch/chile
+        
+        p
             b Response
+        
+        p   
 
     li 
         p 
             b Query #2
 
-        p 
+        p   image-search-api.herokuapp.com/imagesearch/lolcats?offset=10
+        
+        p
             b Response
+            
+        p   
 
     
     
